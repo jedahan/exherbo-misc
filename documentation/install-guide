@@ -1,0 +1,69 @@
+Installation Guide
+------------------
+
+Here is a basic installation guide.  Send all comments to jedahan@gmail.com
+
+1. Read the Documentation
+    * Re-read everything on paludis.pioto.org and exherbo.org .
+    * Check recent mailing list posts for any possible issues that might occur.
+
+2. Boot a live system
+    * Download SystemRescueCD (it has both 32 and 64 bit support)  
+        ``# links http://www.sysresccd.org/Download``
+    * Burn it to a cd or use unetbootin to put it on a usb stick
+    * Reboot, choose the right kernel, and get your network up  
+        ``# net-setup wlan0``
+
+3. Prepare the hard disk
+    * Create a boot partition (~16mb), a root partition (>=4gb), and a home partition  
+        ``# cfdisk /dev/sda``
+    * Format the filesystems for each partition  
+        ``# mkfs.ext2 /dev/sda1  
+          # mkfs.ext4 /dev/sda2  
+	  # mkfs.ext4 /dev/sda3``
+    * Mount root and cd into it  
+        ``# mv /mnt/gentoo /mnt/exherbo && mount /dev/sda2 /mnt/exherbo && cd /mnt/exherbo``
+
+4. Chroot into the system
+    * Get the latest archive of exherbo and extract it  
+        ``# wget http://dev.exherbo.org/stages/exherbo-amd64-current.tar.lzma && unlzma exherbo*lzma``
+    * Mount everything for the chroot  
+        ``# mount -o bind /dev dev/  
+          # mount -o bind /sys sys/  
+          # mount -t proc none proc/  
+          # mount /dev/sda1 boot/  
+          # mount /dev/sda3 home/``
+    * Make sure the network can resolve dns, and mtab is correct
+        ``# cp /etc/resolv.conf etc/resolv.conf  
+	  # cp /proc/mounts etc/mtab``
+    * Change your root!  
+        ``# chroot /mnt/exherbo /bin/bash  
+          # eclectic env update  
+          # source /etc/profile  
+          # export PS1="(chroot) $PS1"``
+
+5. Update the install
+    * Make sure paludis is configured correctly - changing C/CXXFLAGS to -march=native might be a good idea  
+        ``# cd /etc/paludis && vim bashrc && vim *conf``  
+    * _IMPORTANT_ Update paludis BEFORE syncing - since Paludis is very actively developed, its a good idea to update the client to take advantage of new features that might show up with a sync  
+        ``# paludis -i paludis``  
+    * Sync all the trees - cave will eventually be the default exherbo client, it's pretty neat right now but doesn't support much else than sync  
+    ``# cave sync``  
+    * Update the System - normally discarding circular dependencies is bad, but the snapshots aren't always up-to-date and this may have to be run a few times   
+        ``# paludis -i everything --dl-reinstall if-use-changed --dl-upgrade always --dl-circular discard --continue-on-failure if-satisfied``
+    
+6. Make bootable
+    * Install Grub - if you get an error make sure 
+        ``# grub-install /dev/sda1  
+          # grub  
+	  grub> root (hd0,0)  
+	  grub> setup (hd0)  
+	  grub> quit ``
+    * Install a kernel  
+        ``# paludis -i vanilla-sources  
+	  # cd /usr/src/linux && make menuconfig && make && make modules_install && cp arch/x86_64/boot/bzImage /boot/``
+    * Update grub  
+        ``# vim /boot/grub/grub.conf``
+    * Install any hardware stuff you might need, check the FAQ for 'Masked by unavailable' errors  
+        ``# paludis -i iwlwifi-4965-ucode``
+    * Reboot, sacrifice a goat, and pray
