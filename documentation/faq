@@ -1,0 +1,31 @@
+Frequently Asked Questions
+==========================
+  Remember, Exherbo is all about choice, so there are a ton of correct answers to many of these questions. This FAQ just aims to give the simplest of those possible answers.
+
+How do I...
+-----------
+
+*  **...view or add new repositories?**  
+    Try using playman, a script for managing repositories that comes with paludis if you enable the ruby option.  
+    ``# echo "sys-apps/paludis ruby" >> /etc/paludis/options.conf  
+      # paludis -i paludis  
+      # playman -h``  
+	
+*  **...work with binary packages?**  
+    You are going to have to delve a bit into the source code / comments, as this feature is not meant for end-users just yet. It does work though!
+
+*  **...manage packages not in any repository?**  
+    Use importare! If you have the source untarred in some directory, and you already did ./configure && make, try the following.  
+        ``# importare --install --location ~/code/foo-v0.3.4/ category/foo 0.3.4``
+    
+*  **...start writing my own exheres?**  
+    Exheres for smarties is the go-to-guide, but it may be overwhelming for people new to packaging in general.  For paludis to know everything it needs to correctly install a particular package, the bare minimum is the package name, version, build dependencies, run dependencies, and source location.
+
+
+Package Masked Errors
+---------------------    
+
+*  **Masked by unavailable**  
+    ``* All versions of '>=dev-perl/XML-Simple-2' are masked. Candidates are:    
+        * dev-perl/XML-Simple-2.18:0::unavailable (in ::perl): Masked by unavailable (In a repository which is unavailable)``  
+    Try ``# playman -a perl && paludis -s x-perl``
