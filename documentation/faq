@@ -5,11 +5,15 @@ Frequently Asked Questions
 How do I...
 -----------
 
-*  **...view or add new repositories?**  
-    Try using playman, a script for managing repositories that comes with paludis if you enable the ruby option.  
-    ``# echo "sys-apps/paludis ruby" >> /etc/paludis/options.conf  
-      # paludis -i paludis  
-      # playman -h``  
+*  **...add new repositories?**  
+    If you want to add the x11 repository, /etc/paludis/repositories/x11.conf should look like the following:  
+        ``location = ${ROOT}/var/db/paludis/repositories/x11  
+          sync = git://git.exherbo.org/x11.git  
+          format = exheres  
+          names_cache = ${ROOT}/var/cache/paludis/names  
+          write_cache = ${ROOT}/var/cache/paludis/metadata``  
+    When syncing a repository for the first time, prepend x- since paludis doesn't know what the real name is yet  
+        ``# paludis -s x-x11``
 	
 *  **...work with binary packages?**  
     You are going to have to delve a bit into the source code / comments, as this feature is not meant for end-users just yet. It does work though!
