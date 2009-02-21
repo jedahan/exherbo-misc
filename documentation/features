@@ -1,0 +1,21 @@
+Philosophy
+==========
+    Exherbo aims to be a flexible and stable distribution for Open Source developers and tinkerers, people who need thier distribution to support new libraries and packages. It needs to be fun.
+
+
+*  Small core development team
+    A small team is one that can adapt quickly to changes and keep focus on the philosophy of Exherbo. The downside to this is that a team of ~20 cannot maintain 2000+ packages. Exherbo solves this issue by offering robust distrivuted repository management, opting for many small repositories that integrate seamlessly with everyday management.
+
+*  Flexibility
+    Paludis can work with both source-based and binary packages on equal terms, even if they are no defined exheres-based packages for them! Finally you can get the speed of a binary distribution with the control of a source-based one.
+
+*  Tightly integrated bug-reporting
+    With the unwritten repository, packages that haven't been made can be tracked by the distribution itself.
+
+*  Alternatives
+    If program X does everything Y does, but better, Exherbo can use X instead of Y without having to muck about with the exheres.
+
+*  Accounts
+    Safe and tracked account management, with users and groups managed by the system so you don't have to worry about them.
+
+*  
