@@ -38,4 +38,4 @@ Package Masked Errors
 *  **Masked by unavailable**  
     ``* All versions of '>=dev-perl/XML-Simple-2' are masked. Candidates are:    
         * dev-perl/XML-Simple-2.18:0::unavailable (in ::perl): Masked by unavailable (In a repository which is unavailable)``  
-    Try ``# playman -a perl && paludis -s x-perl``
+    See 'How do I add new repositories' above, and add the perl repository. Then run ``# paludis -s x-perl``
