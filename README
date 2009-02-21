@@ -1,0 +1,15 @@
+Howdy
+
+Send all comments to jedahan at gmail.
+
+TODO:
+  scripts/
+    statistics.sh -> scripts/statistics.rb: Learn to use the ruby bindings, and make these work correctly.
+    package-counts.sh -> scripts/package-counts.rb: Convert to use ruby bindings
+    installer.sh: Steal Arch's install script
+
+NOTES:
+  documentation/
+    features: Just paraphrasing the 10 cool things about Exherbo FOSDEM talk.
+    install-guide: Not sure if this should be broken up into a one-page quickinstall guide
+    faq: always looking for more questions
