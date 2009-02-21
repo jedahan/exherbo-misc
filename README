@@ -10,6 +10,6 @@ TODO:
 
 NOTES:
   documentation/
-    features: Just paraphrasing the 10 cool things about Exherbo FOSDEM talk. Definitely have no idea if there is a guiding philosophy, and it's hard to put anything called a philosophy without phrasing it to become as stupid slogan.
+    features: Just paraphrasing the 10 cool things about Exherbo FOSDEM talk. This doc is meant to casually describe some of the benefits of exherbo without going into detail about how they work.
     install-guide: Not sure if this should be broken up into a one-page quickinstall guide
     faq: always looking for more questions
