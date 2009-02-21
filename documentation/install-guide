@@ -1,8 +1,6 @@
 Installation Guide
 ==================
 
-Here is a basic installation guide.  Send all comments to jedahan@gmail.com
-
 1. Read the Documentation
     * Re-read everything on paludis.pioto.org and exherbo.org .
     * Check recent mailing list posts for any possible issues that might occur.
@@ -35,7 +33,7 @@ Here is a basic installation guide.  Send all comments to jedahan@gmail.com
           # mount /dev/sda3 home/``
     * Make sure the network can resolve dns, and mtab is correct
         ``# cp /etc/resolv.conf etc/resolv.conf  
-	  # cp /proc/mounts etc/mtab``
+	  # cat /proc/mounts > etc/mtab``
     * Change your root!  
         ``# chroot /mnt/exherbo /bin/bash  
           # eclectic env update  
@@ -53,7 +51,7 @@ Here is a basic installation guide.  Send all comments to jedahan@gmail.com
         ``# paludis -i everything --dl-reinstall if-use-changed --dl-upgrade always --dl-circular discard --continue-on-failure if-satisfied``
     
 6. Make bootable
-    * Install Grub - if you get an error make sure 
+    * Install Grub
         ``# grub-install /dev/sda1  
           # grub  
 	  grub> root (hd0,0)  
@@ -66,4 +64,4 @@ Here is a basic installation guide.  Send all comments to jedahan@gmail.com
         ``# vim /boot/grub/grub.conf``
     * Install any hardware stuff you might need, check the FAQ for 'Masked by unavailable' errors  
         ``# paludis -i iwlwifi-4965-ucode``
-    * Reboot, sacrifice a goat, and pray
+    * Reboot && sacrifice a goat && pray
