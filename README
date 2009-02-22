@@ -1,15 +1,17 @@
 Howdy
 
-Send all comments to jedahan at gmail.
+Send all comments to jedahan at gmail or jedahan on freenode.
 
 TODO:
   scripts/
-    statistics.sh -> scripts/statistics.rb: Learn to use the ruby bindings, and make these work correctly.
-    package-counts.sh -> scripts/package-counts.rb: Convert to use ruby bindings
-    installer.sh: Steal Arch's install script
+        statistics.sh: Convert to use ruby bindings
+    package-counts.sh: Convert to use ruby bindings
+         installer.sh: Steal Arch's install script
 
 NOTES:
   documentation/
-    features: Just paraphrasing the 10 cool things about Exherbo FOSDEM talk. This doc is meant to casually describe some of the benefits of exherbo without going into detail about how they work.
-    install-guide: Not sure if this should be broken up into a one-page quickinstall guide
-    faq: always looking for more questions
+         features: Just paraphrasing the 10 cool things about Exherbo FOSDEM talk. 
+	           Mean to casually describe some of the benefits of exherbo without 
+		   going into detail about how they work.
+    install-guide: Should this be more / less verbose?
+              faq: always looking for more questions
