@@ -19,7 +19,10 @@ Installation Guide
         ``# mkfs.ext2 /dev/sda1  
           # mkfs.ext4 /dev/sda2  
 	  # mkfs.ext4 /dev/sda3``  
-	  In this example, /dev/sda1 is the /boot partition, ext2 is recommended for speed. /dev/sda2 is going to be the root partition (/) where the system will reside, and /dev/sda3 will be for /home.  If you are having problems with ext4, try ext3.
+	  /dev/sda1 is for /boot, where grub will go.
+	  /dev/sda2 is for /, where the system will reside.
+	  /dev/sda3 is for /home, where user files will go.
+	  ext2 is chosen for /boot to speed up booting, and ext4 for the rest of the filesystem.
 
 4. Chroot into the system
     * Mount root and cd into it  

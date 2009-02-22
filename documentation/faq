@@ -1,6 +1,6 @@
 Frequently Asked Questions
 ==========================
-  The one true answer to all these questions is 'Read [The Documentation][1]'. However, for your convinience, the most common problems have thier answers linked here.
+  The answer to every question is 'Read [The Documentation][1]'. However, for your convinience, the most common problem solutions are linked here.
 
 Basics
 ------
@@ -15,7 +15,8 @@ How do I...
     Don't forget to prepend x- when syncing for the first time!
 
 *  **...manage packages not in any repository?**  
-    [``man importare``][3] If you have the source untarred in some directory, and you already did ./configure && make, try the following.  
+    [``man importare``][3]  
+    If you have the source untarred in some directory, and you already did ./configure && make, try the following.  
         ``# importare --install --location ~/code/foo-v0.3.4/ category/foo 0.3.4``
 	
 *  **...work with binary packages?**  
@@ -26,9 +27,10 @@ How do I...
 
 Package Masked Errors
 ---------------------    
-  It is a good idea to read all the error messages paludis outputs carefully, they are verbose for a reason and easy to understand. All of these errors are prepended by
-    * All versions of 'category/package' are masked. Candidates are:
-      
+  It is a good idea to read all the error messages paludis outputs carefully, they are verbose for a reason and easy to understand.
+
+``* All versions of 'category/package' are masked. Candidates are:``        
+
 *  **Masked by unavailable**    
         * dev-perl/XML-Simple-2.18:0::unavailable (in ::perl): Masked by unavailable (In a repository which is unavailable)  
     Add the perl repository, see 'How do I add new repositories?' above.
