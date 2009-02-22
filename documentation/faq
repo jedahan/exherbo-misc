@@ -1,7 +1,6 @@
 Frequently Asked Questions
 ==========================
-  Remember, Exherbo is all about choice, so there are a ton of correct answers to many of these questions. This FAQ just aims to give the simplest of those possible answers.
-
+  The one true answer to all these questions is 'Read The Documentation'. However, for your convinience, the most common problems have thier answers linked here.
 
 Basics
 ------
@@ -12,6 +11,7 @@ How do I...
 -----------
 
 *  **...add new repositories?**  
+    (ebuild and exheres Repository Formats)[http://paludis.pioto.org/configuration/repositories/e.html]  
     If you want to add the x11 repository, /etc/paludis/repositories/x11.conf should look like the following:  
         ``location = ${ROOT}/var/db/paludis/repositories/x11  
           sync = git://git.exherbo.org/x11.git  
@@ -20,17 +20,16 @@ How do I...
           write_cache = ${ROOT}/var/cache/paludis/metadata``  
     When syncing a repository for the first time, prepend x- since paludis doesn't know what the real name is yet  
         ``# paludis -s x-x11``
-	
-*  **...work with binary packages?**  
-    You are going to have to delve a bit into the source code / comments, as this feature is not meant for end-users just yet. It does work though!
 
 *  **...manage packages not in any repository?**  
-    Use importare! If you have the source untarred in some directory, and you already did ./configure && make, try the following.  
+    Use (importare)[http://paludis.pioto.org/clients/importare.html]! If you have the source untarred in some directory, and you already did ./configure && make, try the following.  
         ``# importare --install --location ~/code/foo-v0.3.4/ category/foo 0.3.4``
+	
+*  **...work with binary packages?**  
+    You are going to have to delve a bit into the source code, as this feature is not meant for end-users just yet.
     
 *  **...start writing my own exheres?**  
-    Exheres for smarties is the go-to-guide, but it may be overwhelming for people new to packaging in general.  For paludis to know everything it needs to correctly install a particular package, the bare minimum is the package name, version, build dependencies, run dependencies, and source location.
-
+    (Exheres for smarties)[http://exherbo.org/docs/exheres-for-smarties.html#tree_layout]  
 
 Package Masked Errors
 ---------------------    
@@ -38,4 +37,4 @@ Package Masked Errors
 *  **Masked by unavailable**  
     ``* All versions of '>=dev-perl/XML-Simple-2' are masked. Candidates are:    
         * dev-perl/XML-Simple-2.18:0::unavailable (in ::perl): Masked by unavailable (In a repository which is unavailable)``  
-    See 'How do I add new repositories' above, and add the perl repository. Then run ``# paludis -s x-perl``
+    It is a good idea to read all the error messages paludis shows, they are verbose for a reason (and easy to understand).  See 'How do I add new repositories' above.
