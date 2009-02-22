@@ -1,17 +1,17 @@
 Frequently Asked Questions
 ==========================
-  The one true answer to all these questions is 'Read The Documentation'. However, for your convinience, the most common problems have thier answers linked here.
+  The one true answer to all these questions is 'Read [The Documentation][1]'. However, for your convinience, the most common problems have thier answers linked here.
 
 Basics
 ------
-*  Why use Exherbo?
+*  **Why use Exherbo?**  
     If you like to know exactly what is going on with your system, you might like Exherbo. If you like to try new alternatives while still having a stable day-to-day system, you might like Exherbo.
 
 How do I...
 -----------
 
 *  **...add new repositories?**  
-    (ebuild and exheres Repository Formats)[http://paludis.pioto.org/configuration/repositories/e.html]  
+    [ebuild and exheres Repository Formats][2]  
     If you want to add the x11 repository, /etc/paludis/repositories/x11.conf should look like the following:  
         ``location = ${ROOT}/var/db/paludis/repositories/x11  
           sync = git://git.exherbo.org/x11.git  
@@ -22,14 +22,14 @@ How do I...
         ``# paludis -s x-x11``
 
 *  **...manage packages not in any repository?**  
-    Use (importare)[http://paludis.pioto.org/clients/importare.html]! If you have the source untarred in some directory, and you already did ./configure && make, try the following.  
+    [``man importare``][3] If you have the source untarred in some directory, and you already did ./configure && make, try the following.  
         ``# importare --install --location ~/code/foo-v0.3.4/ category/foo 0.3.4``
 	
 *  **...work with binary packages?**  
     You are going to have to delve a bit into the source code, as this feature is not meant for end-users just yet.
     
 *  **...start writing my own exheres?**  
-    (Exheres for smarties)[http://exherbo.org/docs/exheres-for-smarties.html#tree_layout]  
+    [Exheres for smarties](http://exherbo.org/docs/exheres-for-smarties.html#tree_layout)  
 
 Package Masked Errors
 ---------------------    
@@ -38,3 +38,7 @@ Package Masked Errors
     ``* All versions of '>=dev-perl/XML-Simple-2' are masked. Candidates are:    
         * dev-perl/XML-Simple-2.18:0::unavailable (in ::perl): Masked by unavailable (In a repository which is unavailable)``  
     It is a good idea to read all the error messages paludis shows, they are verbose for a reason (and easy to understand).  See 'How do I add new repositories' above.
+
+[1]: http://exherbo.org/documentation.html
+[2]: http://paludis.pioto.org/configuration/repositories/e.html "exheres Repository Formats"
+[3]: http://paludis.pioto.org/clients/importare.html "man importare"
