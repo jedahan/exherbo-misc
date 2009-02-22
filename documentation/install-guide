@@ -24,7 +24,7 @@ Installation Guide
 
 4. Chroot into the system
     * Get the latest archive of exherbo and extract it  
-        ``# wget http://dev.exherbo.org/stages/exherbo-amd64-current.tar.lzma && unlzma exherbo*lzma``
+        ``# wget http://dev.exherbo.org/stages/exherbo-amd64-current.tar.lzma && unlzma -c exherbo*lzma | tar xf -``
     * Mount everything for the chroot  
         ``# mount -o bind /dev dev/  
           # mount -o bind /sys sys/  
