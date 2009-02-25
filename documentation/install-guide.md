@@ -7,18 +7,18 @@ Installation Guide
 
 2. Boot a live system
     * Download SystemRescueCD (it has both 32 and 64 bit support)  
-        # links http://www.sysresccd.org/Download  
+          # links http://www.sysresccd.org/Download  
     * Burn it to a cd or use unetbootin to put it on a usb stick
     * Reboot, choose the right kernel, and get your network up  
-        # net-setup wlan0  
+          # net-setup wlan0  
 
 3. Prepare the hard disk
     * Create a boot partition (~16mb), a root partition (>=4gb), and a home partition  
           # cfdisk /dev/sda  
     * Format the filesystems for each partition  
-        # mkfs.ext2 /dev/sda1  
-        # mkfs.ext4 /dev/sda2  
-	# mkfs.ext4 /dev/sda3  
+          # mkfs.ext2 /dev/sda1  
+          # mkfs.ext4 /dev/sda2  
+          # mkfs.ext4 /dev/sda3  
       /dev/sda1 is for /boot, where grub will go.
       /dev/sda2 is for /, where the system will reside.
       /dev/sda3 is for /home, where user files will go.
