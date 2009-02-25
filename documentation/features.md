@@ -16,5 +16,5 @@ Philosophy
   With the unwritten repository, packages that haven't been made can be tracked by the distribution itself, speeding up workflow.
 
 **Alternatives**  
-    If program Y does everything X does, but better, Exherbo can use Y instead of X in all cases.
+  If program Y does everything X does, but better, Exherbo can use Y instead of X in all cases.
 
