@@ -4,16 +4,16 @@ Philosophy
 
 
 **A small core development team**  
-    A small team is one that can adapt quickly to changes and keep focus on the philosophy of Exherbo. The downside to this is that a team of ~20 cannot maintain 2000+ packages. Exherbo solves this issue by offering robust distributed repository management, opting for many small repositories that integrate seamlessly with everyday management.
+  A small team is one that can adapt quickly to changes and keep focus on the philosophy of Exherbo. The downside to this is that a team of ~20 cannot maintain 2000+ packages. Exherbo solves this issue by offering robust distributed repository management, opting for many small repositories that integrate seamlessly with everyday management.
 
 **Flexibility where it makes sense**  
-    Paludis can work with both source-based and binary packages on equal terms, even if there is no defined exheres-based packages for them! Finally you can get the speed of a binary distribution with the control of a source-based one.
+  Paludis can work with both source-based and binary packages on equal terms, even if there is no defined exheres-based packages for them! Finally you can get the speed of a binary distribution with the control of a source-based one.
 
 **Simple, safe account management**  
-    Safe and tracked account management, with users and groups managed by the system so you don't have to worry about them.
+  Safe and tracked account management, with users and groups managed by the system so you don't have to worry about them.
 
 **Tracking unwritten packages**  
-    With the unwritten repository, packages that haven't been made can be tracked by the distribution itself, speeding up workflow.
+  With the unwritten repository, packages that haven't been made can be tracked by the distribution itself, speeding up workflow.
 
 **Alternatives**  
     If program Y does everything X does, but better, Exherbo can use Y instead of X in all cases.

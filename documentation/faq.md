@@ -17,7 +17,7 @@ How do I...
 *  **...manage packages not in any repository?**  
     [``man importare``][3]  
     If you have the source untarred in some directory, and you already did ./configure && make, try the following.  
-        ``# importare --install --location ~/code/foo-v0.3.4/ category/foo 0.3.4``
+        # importare --install --location ~/code/foo-v0.3.4/ category/foo 0.3.4
 	
 *  **...work with binary packages?**  
     You are going to have to delve a bit into the source code, as this feature is not meant for end-users just yet.
@@ -26,7 +26,8 @@ How do I...
     [Exheres for smarties](http://exherbo.org/docs/exheres-for-smarties.html#tree_layout)  
 
 Package Masked Errors
----------------------    
+---------------------
+
   It is a good idea to read all the error messages paludis outputs carefully, they are verbose for a reason and easy to understand.
 
 ``* All versions of 'category/package' are masked. Candidates are:``        
