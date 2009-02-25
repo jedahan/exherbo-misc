@@ -30,18 +30,18 @@ Package Masked Errors
 
   It is a good idea to read all the error messages paludis outputs carefully, they are verbose for a reason and easy to understand.
 
-``* All versions of 'category/package' are masked. Candidates are:``        
+``* All versions of 'category/package' are masked. Candidates are:``
 
 *  **Masked by unavailable**    
-      ``* dev-perl/XML-Simple-2.18:0::unavailable (in ::perl): Masked by unavailable (In a repository which is unavailable)``
+      ``* dev-perl/XML-Simple-2.18:0::unavailable (in ::perl): Masked by unavailable (In a repository which is unavailable)``  
     Add the perl repository, see 'How do I add new repositories?' above.
 
 *  **Masked by unwritten**  
-      ``* net-fs/samba-3.0.32:0::unwritten: Masked by unwritten (Package has not been written yet)``
+      ``* net-fs/samba-3.0.32:0::unwritten: Masked by unwritten (Package has not been written yet)``  
     This means the package hasn't been written, try 'paludis -q samba', then see 'How do I start writing exheres?' above.
 
 *  **Masked by platform**  
-      ``* sys-boot/grub-1.96:0::arbor: Masked by platform (~x86)``
+      ``* sys-boot/grub-1.96:0::arbor: Masked by platform (~x86)``  
         # echo "sys-boot/grub ~x86" >> /etc/paludis/platforms.conf
 
 [1]: http://exherbo.org/documentation.html
