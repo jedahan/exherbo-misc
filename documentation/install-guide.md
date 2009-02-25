@@ -68,6 +68,6 @@ Installation Guide
           # vim /boot/grub/grub.conf  
       The configuration of grub is wildly different between grub-static (0.97) and grub2 (1.9x). Consult /usr/share/doc/grub*/ and the website for those changes if you want to use grub2. NOTE: grub2 will not compile on ~amd64 until Exherbo gets a working multilib.  
     * Install any hardware stuff you might need, check the FAQ for 'Masked by unavailable' errors  
-        # paludis -i iwlwifi-4965-ucode  
+          # paludis -i iwlwifi-4965-ucode  
     * Reboot  
-        # reboot && sacrifice a goat && pray  
+          # reboot && sacrifice a goat && pray  
