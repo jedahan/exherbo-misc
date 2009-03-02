@@ -7,6 +7,8 @@
 #
 # You may also want to set $PALUDIS_HOOKS_AUTO_PATCH_DIR in /etc/paludis/bashrc
 
+source ${PALUDIS_ECHO_FUNCTIONS_DIR:-${PALUDIS_EBUILD_DIR}}/echo_functions.bash
+
 AUTOPATCH_DIR="${PALUDIS_HOOKS_AUTO_PATCH_DIR}/${CATEGORY}/${PN}"
 AUTOPATCHED_FILE="${PALUDIS_HOOKS_TMPDIR:-${ROOT}/var/tmp/paludis}/._autopatched_${PALUDIS_PID}"
 
