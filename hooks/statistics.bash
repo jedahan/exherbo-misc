@@ -1,28 +1,19 @@
 #!/bin/env bash
+# vim: set et sw=4 sts=4 :
 # 
 # Show installed and available packages, repositories. Symlink to:
 #
 #  /usr/share/paludis/hooks/sync_all_post 
 #  /usr/share/paludis/hooks/sync_post
 #
-# BUGS:
-#   does not count duplicates...
 
 pInstalled=`paludis --list-packages --repository installed | grep -c "*"`
-rInstalled=`paludis --list-repositories | grep -v account | grep -v installed | grep -v unwritten | awk -F " " '{print $2}'`
-pTotal=0
-rICount=-2 # unavailable{-unofficial} don't count
-rOfficial=1 # arbor!
+pAvailable=`cave print-packages | grep -v user/ | grep -v group/ | grep -v virtual/ | wc -l`
 
-for r in ${rInstalled} ; do
-    pCount=`paludis --list-packages --repository ${r} | grep -c "*"`
-    let "pTotal += ${pCount}"
-    let "rICount += 1"
-done
-
-# collect repository statistics
-let "rOfficial += `ls /var/db/paludis/repositories/unavailable/*repository | wc -l`"
+rInstalled=`cave print-repositories | grep -v account | grep -v installed | grep -v unwritten | grep -v unavailable | wc -l`
+rOfficial=`ls /var/db/paludis/repositories/unavailable/*repository | wc -l`
+let "rOfficial += 1" # arbor
 rUnofficial=`ls /var/db/paludis/repositories/unavailable-unofficial/*repository | wc -l`
 
-echo "   $pInstalled packages installed out of $pTotal available"
-echo "  $rICount repositories installed, $rOfficial official and $rUnofficial unofficial are available"
+echo "   $pInstalled packages installed out of $pAvailable available"
+echo "  $rInstalled package repositories installed, $rOfficial official and $rUnofficial unofficial are available"
