@@ -1,0 +1,11 @@
+Exherbo Stuffs
+==============
+
+Jonathan Dehan <jedahan/gmail> jedahan on freenode
+
+NOTES:
+  documentation/
+         features: Just paraphrasing the 10 cool things about Exherbo FOSDEM talk. 
+	           Mean to casually describe some of the benefits of exherbo without 
+		   going into detail about how they work.
+              faq: more questions welcome
