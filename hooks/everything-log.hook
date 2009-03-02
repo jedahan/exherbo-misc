@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+#
+#  This hook shows paludis.log from the last time you installed target everything.
+#  Copy or symlink to
+#  
+#  /usr/share/paludis/hooks/auto
+#
+
+case "${HOOK}" in
+    install_all_post)
+        if ${TARGETS}=="everything"
+            cd /tmp
+            splits=`csplit -k /var/log/paludis.log  /starting\ install\ of\ targets\ everything/ /finished\ install\ of\ targets\ everything/+1 | wc -l`
+            let "splits -= 2"
+            echo "Result of last --install everything:"
+            cat "xx0$splits"
+            rm xx*
+        fi
+        ;;
+esac
