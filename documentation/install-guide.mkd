@@ -28,7 +28,7 @@ Installation Guide
     * Mount root and cd into it  
           # mkdir /mnt/exherbo && mount /dev/sda2 /mnt/exherbo && cd /mnt/exherbo  
     * Get the latest archive of exherbo and extract it  
-          # wget http://dev.exherbo.org/stages/exherbo-amd64-current.tar.lzma && unlzma -c exherbo*lzma | tar xf -  
+          # wget http://dev.exherbo.org/stages/exherbo-amd64-current.tar.lzma && unlzma -c exherbo*lzma | tar xpf -  
     * Mount everything for the chroot  
           # mount -o bind /dev /mnt/exherbo/dev/  
           # mount -o bind /sys /mnt/exherbo/sys/  
