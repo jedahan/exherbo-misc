@@ -55,18 +55,19 @@ Installation Guide
           # paludis -i everything --dl-reinstall if-use-changed --dl-upgrade always  
     
 6. Make bootable
-    * Install Grub Legacy (amd64) 
+    * Install a kernel  
+          # paludis -i vanilla-sources  
+          ``# cd /usr/src/linux && make menuconfig && make && make modules_install && cp arch/x86_64/boot/bzImage /boot/``  
+    * Install Grub  
           # grub-install /dev/sda1  
+      The configuration of grub is wildly different between grub legacy and grub2. Consult /usr/share/doc/grub*/ and the website for those changes.  
+    * If you are using Grub Legacy (amd64), grub-install isn't enough  
           # grub  
           grub> root (hd0,0)  
           grub> setup (hd0)  
           grub> quit  
-    * Install a kernel  
-          # paludis -i vanilla-sources  
-          ``# cd /usr/src/linux && make menuconfig && make && make modules_install && cp arch/x86_64/boot/bzImage /boot/``  
     * Update grub  
           # vim /boot/grub/grub.conf  
-      The configuration of grub is wildly different between grub legacy and grub2. Consult /usr/share/doc/grub*/ and the website for those changes.  
     * Grub Legacy example configuration (amd64)  
           timeout 10  
           default 0  
