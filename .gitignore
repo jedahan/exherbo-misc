@@ -1,1 +1,4 @@
 documentation/*.html
+hooks/pint*
+hooks/time.bash
+soc/*
