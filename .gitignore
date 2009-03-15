@@ -1,4 +1,2 @@
-documentation/*.html
-hooks/pint*
+hooks/pint.rb
 hooks/time.bash
-soc/*
