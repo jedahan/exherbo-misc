@@ -14,14 +14,18 @@ rInstalled=`cave print-repositories | grep -v account | grep -v installed | grep
 rOfficial=`ls /var/db/paludis/repositories/unavailable/*repository | wc -l`
 let "rOfficial += 1" # arbor
 rUnofficial=`ls /var/db/paludis/repositories/unavailable-unofficial/*repository | wc -l`
+let "rAvailable = $rOfficial + $rUnofficial"
 
+
+# calculate the number of packages / day
 pOld=`date -d "Wed Feb 11 11:22:48 CET 2009" +%s`
 pNew=`date +%s`
 let "pDays = ($pNew - $pOld) / 86400"
-
 let "pDelta = $pAvailable-1379"
 let "pPerDay = $pDelta/$pDays"
 
-echo "   $pInstalled packages installed out of $pAvailable available"
-echo "  $rInstalled package repositories installed, $rOfficial official and $rUnofficial unofficial are available"
-echo " $pDelta new packages have been added in the past $pDays days, thats at least $pPerDay per day!"
+echo "    packages: $pInstalled installed    $pAvailable available    $pPerDay new daily"
+echo "repositories:  $rInstalled installed      $rAvailable available"
+
+#echo "  $rInstalled repositories installed /   $rOfficial official & $rUnofficial unofficial"
+#echo " $pDelta packages added in the last $pDays days, at least $pPerDay/day!"
