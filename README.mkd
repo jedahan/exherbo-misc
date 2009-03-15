@@ -2,3 +2,7 @@ Exherbo Stuffs
 ==============
 
 Jonathan Dehan <jedahan@gmail.com>
+
+Notes
+=====
+    distributo.mkd: Might be a neat SoC project...
