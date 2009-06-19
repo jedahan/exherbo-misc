@@ -17,6 +17,5 @@ rInstalled=`cave print-repositories | egrep -vc 'account|installed|un'`
 rAvailable=`ls {$rLoc,$ruLoc}/* | wc -l`
 let "rAvailable += 1" # arbor
 
-
 echo "    packages: $pInstalled installed    $pAvailable available"
 echo "repositories:  $rInstalled installed      $rAvailable available"
