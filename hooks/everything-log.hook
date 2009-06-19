@@ -6,15 +6,18 @@
 #  /usr/share/paludis/hooks/auto
 #
 
-case "${HOOK}" in
-    install_all_post)
-        if ${TARGETS}=="everything"
-            cd /tmp
-            splits=`csplit -k /var/log/paludis.log  /starting\ install\ of\ targets\ everything/ /finished\ install\ of\ targets\ everything/+1 | wc -l`
-            let "splits -= 2"
-            echo "Result of last --install everything:"
-            cat "xx0$splits"
-            rm xx*
-        fi
-        ;;
-esac
+hook_run_install_pretend_post() {
+    if [[ ${TARGETS} = "everything"  ]]
+    then
+        cd /tmp
+        splits=`csplit -k /var/log/paludis.log  /starting\ install\ of\ targets\ everything/ /finished\ install\ of\ targets\ everything/+1 | wc -l`
+        let "splits -= 2"
+        echo "Result of last --install everything:"
+        cat "xx0$splits"
+        rm xx*
+    fi
+}
+
+hook_auto_names() {
+    echo install_pretend_post
+}
