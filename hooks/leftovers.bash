@@ -30,7 +30,7 @@ case "${HOOK}" in
     einfo "Leftover files:"
     for i in `cat ${contentfile}`; do 
         if [ -e $i ]; then 
-            echo "\t$i"
+            echo "  $i"
         fi ; 
     done
 
