@@ -30,7 +30,7 @@ Help
   Options:
     --profile=PROFILE, -p       Build ``/etc/distributo/distribution/profile.conf``
     --directory=DIRECTORY, -d   Install to ``DIRECTORY``
-    --overwrite, -o             Choose how to resolve image directory contents
+    --overwrite, -o             Choose how to resolve image directory conflicts
         always                      Always overwrite 
         rename (default)            Rename to ._image_$oldFilename
         never                       Don't move them over
@@ -41,7 +41,7 @@ How it Works
 
   Build the profile.
   Copy over the root image directory, overwriting or renaming files with conflicts.
-  Run script.
+  Run script, with arguments name.
   
   Default script:
       
