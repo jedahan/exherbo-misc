@@ -15,25 +15,27 @@
 
 source ${PALUDIS_ECHO_FUNCTIONS_DIR:-${PALUDIS_EBUILD_DIR}}/echo_functions.bash
 
-contentfile="${PALUDIS_HOOKS_TMPDIR:-${ROOT}/var/tmp/paludis}/content.${PALUDIS_PID}"
+fileprefix="${PALUDIS_HOOKS_TMPDIR:-${ROOT}/var/tmp/paludis}/${PALUDIS_PID}"
+contentsfile="${fileprefix}.contents"
+rmfile="${fileprefix}.remove"
 
 case "${HOOK}" in
     uninstall_all_pre)
-    einfo "Building package contents list"
     for i in `${PALUDIS_COMMAND} -k ${TARGETS} | grep '^\    /' | cut -d' ' -f5`; do 
         ls -dF "$i" | sed -e '/\/$/ d' -e 's/\*//g'; 
-    done > ${contentfile}
+    done > ${contentsfile}
 
     ;;
 
     uninstall_all_post)
-    einfo "Leftover files:"
-    for i in `cat ${contentfile}`; do 
+    for i in `cat ${contentsfile}`; do 
         if [ -e $i ]; then 
-            echo "  $i"
-        fi ; 
+            echo $i >> ${rmfile}
+        fi
     done
-
+    if [ -e ${rmfile} ]; then
+        einfo "cat ${rmfile} | xargs sudo rm -rf"
+    fi
     ;;
 
     *)
@@ -41,5 +43,3 @@ case "${HOOK}" in
 
     ;;
 esac
-
-
