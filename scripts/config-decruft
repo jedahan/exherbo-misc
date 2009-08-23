@@ -18,13 +18,32 @@ def fmt_use(var, use, state = true)
     colour(33, (var.empty? ? "" : "#{var}: ") + (state ? use : "-#{use}"))
 end
 def fmt_pkg(pkg)
-    pkg.slot # force this to be included
+    pkg.slot_key # force this to be included
     colour(31, pkg)
+end
+
+############## look up conf file name ##############
+
+def conf_file_name(generic_name)
+    if $conf_file_map.nil?
+        $conf_file_map = {}
+        filename = "#{$distributions_dir}/#{$env.distribution}/paludis.conf"
+        File.open(filename) do | file |
+            file.each_line do | line |
+                if line =~ /^\s*([^=]+)_filename_part\s*=\s*(.*)\s*$/
+                    $conf_file_map[$1] = $2
+                end
+            end
+        end
+    end
+
+    return $conf_file_map[generic_name]
 end
 
 ################ config file reader ################
 
-def read_conf(name, extra = nil)
+def read_conf(generic_name, extra = nil)
+    name = conf_file_name(generic_name)
     filenames = Dir["#{$config_dir}/#{name}.conf.d/*.conf"]
     filenames.unshift("#{$config_dir}/#{name}.conf")
 
@@ -130,7 +149,16 @@ class Paludis::PackageID
         end
         @@origins[self] = nil
     end
+
+    def slot_key
+        fake_slot_key = slot
+        class <<fake_slot_key; def value() self; end; end
+        fake_slot_key
+    end unless instance_methods.include?("slot_key")
 end
+
+NoSlot = ""
+class <<NoSlot; def value() self; end; end
 
 ################ initialisation ################
 
@@ -192,6 +220,8 @@ if $env.format_key.value != "paludis" then
 end
 $config_dir = $env.config_location_key.value
 $db = $env.package_database
+$distributions_dir = ENV['PALUDIS_DISTRIBUTIONS_DIR'] || '/usr/share/paludis/distributions'
+$conf_file_map = nil 
 
 ################ keywords.conf ################
 
@@ -251,7 +281,7 @@ read_conf("keywords", "pass 2/2") do | line, report |
 
     installed_slots = {}
     query_installed(spec, Paludis::Selection::AllVersionsUnsorted).each do | pkg |
-        installed_slots[pkg.slot] = pkg
+        installed_slots[(pkg.slot_key || NoSlot).value] = pkg
     end
 
     if installed_slots.empty? then
@@ -275,8 +305,8 @@ read_conf("keywords", "pass 2/2") do | line, report |
             # Since we're grouping by slot, if we've found one in the
             # correct slot and this one is in a different slot, then
             # there can be no more to come.
-            break if older.slot != slot && newest_older
-            next  if older.slot != slot
+            break if (older.slot_key || NoSlot).value != slot && newest_older
+            next  if (older.slot_key || NoSlot).value != slot
 
             kws = older.keywords_key.value
             accepted = kws & global_kws.keys
@@ -379,7 +409,6 @@ read_conf("use", "pass 2/2") do | line, report |
                         iuse[choice.prefix][value.unprefixed_name] = :maybe
                     end
                 end unless pkg.choices_key.nil?
-
             else
                 pkg.origin.choices_key.value.each do | choice |
                     choice.each do | value |
@@ -559,9 +588,9 @@ read_conf("package_mask") do | line, report |
 
     unmasked_slots = {}
     unmasked.each do | pkg |
-        unmasked_slots[pkg.slot] = pkg unless
-            unmasked_slots[pkg.slot] &&
-            unmasked_slots[pkg.slot].version > pkg.version
+        unmasked_slots[(pkg.slot_key || NoSlot).value] = pkg unless
+            unmasked_slots[(pkg.slot_key || NoSlot).value] &&
+            unmasked_slots[(pkg.slot_key || NoSlot).value].version > pkg.version
     end
 
     unmasked_slots.each_pair do | slot, pkg |
@@ -607,7 +636,7 @@ read_conf("package_unmask") do | line, report |
 
     installed_slots = {}
     query_installed(spec, Paludis::Selection::AllVersionsUnsorted).each do | pkg |
-        installed_slots[pkg.slot] = pkg
+        installed_slots[(pkg.slot_key || NoSlot).value] = pkg
     end
 
     if installed_slots.empty? then
@@ -629,7 +658,7 @@ read_conf("package_unmask") do | line, report |
         # useful to the user).
 
         uninst.each do | older |
-            next if older.slot != slot
+            next if (older.slot_key || NoSlot).value != slot
             repo = $db.fetch_repository(older.repository_name)
 
             # These won't be checked by NotMasked because we're in
