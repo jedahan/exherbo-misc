@@ -1,53 +1,45 @@
+Installation
+============
+    The goal is to be able to create a stable, up-to-date distribution of
+    linux software. Installation should be as follows:
+
+    burn & boot livecd
+        wget http://destructivesynthesis.wordpress.org/exherbo.tar.bz2 | tar xf - && wodim exherbo.iso && reboot
+    mount installation directories
+        choose /, /boot, /home
+    set environment variables
+        timezone, username, password, root[=/mnt/install]
+    install exherbo flavour
+        paludis -i exherbo-flavour [-d=$root]
+    update system
+        eclectiv config interactive
+
 Distibuto
 =========
-  Distributo is a client that helps build distributions based on exherbo.
+    Distributo builds a flavour of exherbo that should be able to replicate
+    an installed system.
 
-  Each file in ``$DISTRIBUTO_CONFIG_DIR`` defines a distribution (default 
-  ``/etc/distributo/``). There must also be profiles in ``$DISTRIBUTO_PROFILES_DIR``, 
-  following the same format as an exheres profile directory (default 
-  ``$DISTRIBUTO_CONF_DIR/profiles``). A distribution configuration file is 
-  a standard key=value config file, and it may be in bash format (in which 
-  case it has a .bash extension rather than .conf).  For more details, see 
-  the [Paludis Configuration File Format][1].
-
-General Keys
-------------
-    name
-      name of the distribution
-    image
-      directory path that will be copied over post-build
-    script
-      path to any script to be run after EVERYTHING
-    profile
-      path to profile directory, defaults to ``$DISTRIBUTO_PROFILES_DIR/$NAME/base``
-
-Help
-----
-
-    # distributo --help
-  Usage: distributo [options] [PROFILE] [DIRECTORY]
-  
-  Options:
-    --profile=PROFILE, -p       Build ``/etc/distributo/distribution/profile.conf``
-    --directory=DIRECTORY, -d   Install to ``DIRECTORY``
-    --overwrite, -o             Choose how to resolve image directory conflicts
-        always                      Always overwrite 
-        rename (default)            Rename to ._image_$oldFilename
-        never                       Don't move them over
-    --help, -h                  Show this help
-
-How it Works
-------------
-
-  Build the profile.
-  Copy over the root image directory, overwriting or renaming files with conflicts.
-  Run script, with arguments name.
-  
-  Default script:
-      
-      eclectic config update
-      eclectic image update
-      asciigen $name >> $directory/etc/login
-
-
-[1]: http://paludis.pioto.org/configuration/configfiles.html
+    It consists of the following files:
+        /var/repositories/exherbo-flavour/packages/
+            flavour/
+                depends on flavour-base, flavour-misc
+            flavour-base/
+                for package in `cat $root/var/db/paludis/installed/world`; do
+                    sudo paludis --info sudo | grep \:\:installed | cut -d':' -f1 | cut -d' ' -f2 | xargs -I xxx cp xxx
+            flavour-misc/
+                tmp = /var/tmp/distributo/flavour/
+                paludis -i $tmp/flavour-base.exheres-0 -d $tmp/build
+                ignore = /root/.bash_history
+                echo "copying config files"
+                for config in `find $tmp/build/etc/`; do
+                    cp $root/etc/$config $tmp/build/etc/._cfg_$config_001
+                done
+                echo "building supplimental file list"
+                for misc in `find $root{/home/root,/usr/local} | grep -v $root/$ignore`; do
+                    if [ ! -e $tmp/build/$misc ]; then
+                        echo $misc >> $tmp/misc
+                    fi
+                done
+                echo "editing the supplimental file list" && sleep 5
+                vim $tmp/misc
+                tar xvjpf files/flavour-misc.tar.bz2 `cat $tmp/misc`
