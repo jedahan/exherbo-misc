@@ -15,7 +15,7 @@
 
 source ${PALUDIS_ECHO_FUNCTIONS_DIR:-${PALUDIS_EBUILD_DIR}}/echo_functions.bash
 
-fileprefix="${PALUDIS_HOOKS_TMPDIR:-${ROOT}/var/tmp/paludis}/${PALUDIS_PID}"
+fileprefix="${PALUDIS_HOOKS_TMPDIR:-${ROOT}var/tmp/paludis}/${PALUDIS_PID}"
 contentsfile="${fileprefix}.contents"
 rmfile="${fileprefix}.remove"
 
@@ -34,6 +34,7 @@ case "${HOOK}" in
         fi
     done
     if [ -e ${rmfile} ]; then
+        einfo `cat ${rmfile}`
         einfo "cat ${rmfile} | xargs sudo rm -rf"
     fi
     ;;
