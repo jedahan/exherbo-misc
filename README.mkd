@@ -5,4 +5,6 @@ Jonathan Dehan <jedahan@gmail.com>
 
 Notes
 =====
-    distributo.mkd: Might be a neat SoC project...
+         hooks/:  paludis hooks
+       scripts/:  miscellaneous collected scripts for exherbo
+ distributo.mkd:  attemp at a standard install method
