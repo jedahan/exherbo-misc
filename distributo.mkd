@@ -1,45 +1,71 @@
 Installation
 ============
-    The goal is to be able to create a stable, up-to-date distribution of
-    linux software. Installation should be as follows:
+  The goal is to be able to create a stable, up-to-date distribution of
+  linux software. The simplest installation should be as follows:
 
-    burn & boot livecd
-        wget http://destructivesynthesis.wordpress.org/exherbo.tar.bz2 | tar xf - && wodim exherbo.iso && reboot
-    mount installation directories
-        choose /, /boot, /home
-    set environment variables
-        timezone, username, password, root[=/mnt/install]
-    install exherbo flavour
-        paludis -i exherbo-flavour [-d=$root]
-    update system
-        eclectiv config interactive
+  download, burn and boot livecd
+      `wget http://destructivesynthesis.wordpress.org/exherbo.tar.bz2 | tar xf - && wodim exherbo.iso && reboot`
+  mount installation directories
+      `choose /, /boot, /home`
+  set environment variables
+      `timezone, username, password, root[=/mnt/install]`
+  install exherbo flavour
+      `paludis -i flavour::flavour [-d=$root]`
+  update system
+      `eclectic config interactive`
 
 Distibuto
 =========
-    Distributo builds a flavour of exherbo that should be able to replicate
-    an installed system.
+  Distributo builds a repository with all the necessary packages to
+  replicate an installed system
 
-    It consists of the following files:
-        /var/repositories/exherbo-flavour/packages/
-            flavour/
-                depends on flavour-base, flavour-misc
-            flavour-base/
-                for package in `cat $root/var/db/paludis/installed/world`; do
-                    sudo paludis --info sudo | grep \:\:installed | cut -d':' -f1 | cut -d' ' -f2 | xargs -I xxx cp xxx
-            flavour-misc/
-                tmp = /var/tmp/distributo/flavour/
-                paludis -i $tmp/flavour-base.exheres-0 -d $tmp/build
-                ignore = /root/.bash_history
-                echo "copying config files"
-                for config in `find $tmp/build/etc/`; do
-                    cp $root/etc/$config $tmp/build/etc/._cfg_$config_001
-                done
-                echo "building supplimental file list"
-                for misc in `find $root{/home/root,/usr/local} | grep -v $root/$ignore`; do
-                    if [ ! -e $tmp/build/$misc ]; then
-                        echo $misc >> $tmp/misc
-                    fi
-                done
-                echo "editing the supplimental file list" && sleep 5
-                vim $tmp/misc
-                tar xvjpf files/flavour-misc.tar.bz2 `cat $tmp/misc`
+  Three exheres are created:
+    `flavour-base`
+        'Virtual' exheres that depends on the PNVR of each package in world
+        may read /etc/distributo/.base-{white,black}list
+    `flavour-misc`
+        Takes any modified config files and tars them up as ._cfg_$filename_001
+        Takes any new or modified files in /root/ and also tars them up
+        may read $root/etc/distributo/.{etc,misc}-{white,black}list
+    `flavour`
+        'Virtual' exheres that depends on flavour-base and flavour-misc
+        
+Psuedo-code
+===========
+
+  `cfgroot=$root/etc/distributo/`
+  `tmp=$root/var/tmp/distributo/`
+
+  flavour-base
+
+      # Dependency calculation
+      pkgs=`cat $root/var/db/paldis/repositories/installed/world $cfgroot/.base-blacklist | uniq -u`
+      for pkg in `echo $pkgs; cat $cfgroot/.bash-whitelist`; do
+                version=`paludis -q $pkg | grep installed | awk '{print $2}' | cut -d'*' -f1`
+                DEPS="$DEPS\n $pkg[>=$version]"
+      done
+
+  flavour-misc
+    
+        # we may want to just use paludis -k...
+        paludis -i $tmp/flavour-base.exheres-0 -d $tmp/build
+
+        echo "copying config files"
+        configs=`find $tmp/build/etc/; cat $cfgroot/.etc-blacklist | uniq -u`
+        for config in `echo $configs; cat $cfgroot/.etc-whitelist`; do
+            if [ -e $root$config ]; then
+                if [ ! -eq `cat $root$config` `cat $config` ]; then
+                    cp $root$config $tmp/build/._cfg_$config_001
+                fi
+            fi
+        done
+
+        echo "building supplimental file list"
+        miscs=`find $root{/root,/usr/local}; cat $cfgroot/.etc-blacklist | uniq -u`
+        for misc in `echo $miscs; cat $cfgroot/.etc-whitelist`; do
+            if [ ! -e $tmp/build/$misc ]; then
+                echo $misc >> $tmp/misc
+            fi
+        done
+
+        tar xvjpf files/flavour-misc.tar.bz2 `cat $tmp/misc`
