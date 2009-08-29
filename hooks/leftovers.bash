@@ -35,6 +35,8 @@ case "${HOOK}" in
     done
     if [ -e ${rmfile} ]; then
         einfo `cat ${rmfile}`
+        echo ${rmfile} >> ${rmfile}
+        echo ${contentsfile} >> ${rmfile}
         einfo "cat ${rmfile} | xargs sudo rm -rf"
     fi
     ;;
