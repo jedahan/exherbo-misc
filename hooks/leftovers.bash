@@ -20,6 +20,8 @@ contentsfile="${fileprefix}.contents"
 rmfile="${fileprefix}.remove"
 
 case "${HOOK}" in
+    # TODO: don't just get the contents of the targets, but all packages to be 
+    # uninstalled. This will add --with-unused-dependencies support.
     uninstall_all_pre)
     for i in `${PALUDIS_COMMAND} -k ${TARGETS} | grep '^\    /' | cut -d' ' -f5`; do 
         ls -dF "$i" | sed -e '/\/$/ d' -e 's/\*//g'; 
