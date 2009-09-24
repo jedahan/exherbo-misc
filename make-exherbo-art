@@ -1,0 +1,409 @@
+#!/usr/bin/python
+
+# Copyright (c) 2009 Sterling X. Winter <sterling.winter@gmail.com>
+# See the file LICENSE for redistribution information.
+
+from commands import getstatusoutput
+from ConfigParser import NoOptionError, NoSectionError, SafeConfigParser
+from optparse import OptionParser
+from tempfile import mkstemp
+
+import os, re, shutil, sys, traceback
+
+DEFAULT_BACKGROUND_COLORS = ""
+DEFAULT_CONFIG_FILE       = "/etc/exherbo-artwork.cfg"
+DEFAULT_FORMATS           = "svg"
+DEFAULT_INPUT_DIR         = "/usr/share/exherbo-artwork"
+DEFAULT_OUTPUT_DIR        = "."
+DEFAULT_RESOLUTIONS       = "1024x768"
+
+FORMATS_REGEX     = re.compile(r"^grub_legacy|[a-z]+$")
+RESOLUTIONS_REGEX = re.compile(r"^\d+x\d+$")
+RGB_REGEX         = re.compile(r"^#[0-9a-fA-F]{6}$")
+
+PROGRAM_NAME = os.path.basename(sys.argv[0])
+
+def convertFormat(options,
+                  format,
+                  width,
+                  height,
+                  backgroundColor,
+                  inputFilePath,
+                  outputDir,
+                  outputFile):
+    if backgroundColor:
+        backgroundColorParam = " --bg-color=" + backgroundColor
+    else:
+        backgroundColorParam = ""
+
+    if format == "svg":
+        outputFilePath = os.path.join(outputDir, outputFile + ".svg")
+        runShellCommand("svgmod "
+            "--width=%s "
+            "--height=%s%s "
+            "\"%s\" "
+            "\"%s\"" % (width, height, backgroundColorParam, inputFilePath, outputFilePath))
+        if not options.quiet:
+            print "  + " + outputFilePath
+        return
+    else:
+        runShellCommand("svgmod "
+            "--width=%s "
+            "--height=%s%s "
+            "--rasterize "
+            "\"%s\" "
+            "\"/tmp/%s.png\"" % (width, height, backgroundColorParam, inputFilePath, outputFile))
+
+    if format == "png":
+        outputFilePath = os.path.join(outputDir, outputFile + ".png")
+        shutil.move("/tmp/" + outputFile + ".png", outputFilePath)
+    else:
+        outputFilePath = os.path.join(outputDir, outputFile + "." + format)
+        runShellCommand("convert \"/tmp/%s.png\" \"%s\"" % (outputFile, outputFilePath))
+        os.remove("/tmp/" + outputFile + ".png")
+
+    if not options.quiet:
+        print "  + " + outputFilePath
+
+def convertGrubLegacy(options, backgroundColor, inputFilePath, outputFile, outputDir):
+    if backgroundColor:
+        backgroundColorParam = " --bg-color=" + backgroundColor
+    else:
+        backgroundColorParam = ""
+
+    # Convert SVG to temp PNG with SVGmod
+    runShellCommand("svgmod "
+        "--width=640 "
+        "--height=480%s "
+        "--rasterize "
+        "\"%s\" "
+        "\"/tmp/%s.png\"" % (backgroundColorParam, inputFilePath, outputFile))
+
+    # Convert temp PNG to 14 color XPM with ImageMagick
+    runShellCommand("convert "
+        "+dither "
+        "-colors 14 "
+        "\"/tmp/%s.png\" "
+        "\"%s/%s.xpm\"" % (outputFile, outputDir, outputFile))
+
+    # gzip XPM, replacing original
+    runShellCommand("gzip --force \"%s/%s.xpm\"" % (outputDir, outputFile))
+
+    # Remove temp PNG
+    os.remove("/tmp/" + outputFile + ".png")
+
+    if not options.quiet:
+        print "  + " + os.path.join(outputDir, outputFile + ".xpm.gz")
+
+def exitWithErrorMessage(message):
+    if options.debug:
+        traceback.print_exc()
+    sys.stderr.write(PROGRAM_NAME + ": error: " + message + "\n")
+    sys.exit(1)
+
+def getRealPath(path):
+    """
+    Python's os.path.realpath() returns the CWD if the value passed is an empty
+    string -- this behavior is DO NOT WANT.
+    """
+    if path == "":
+        return ""
+    else:
+        return os.path.realpath(path)
+
+def parseArgs():
+    parser = OptionParser(usage="%prog [OPTIONS]")
+
+    parser.add_option("-c", "--config", dest="configFile", metavar="FILE", help="use configuration from FILE")
+    parser.add_option("-d", "--debug", action="store_true", help="show debugging info")
+    parser.add_option("-o", "--output-dir", dest="outputDir", metavar="DIR", help="save to DIR (default: current directory)")
+    parser.add_option("-q", "--quiet", action="store_true", default=False, help="suppress messages")
+
+    (options, args) = parser.parse_args()
+
+    if options.outputDir:
+        options.outputDir = getRealPath(options.outputDir)
+        if not os.path.exists(options.outputDir):
+            parser.error("Option --output-dir requires a valid directory.")
+
+    if options.debug:
+        options.quiet = False
+
+    return options
+
+def parseBackgroundColors(backgroundColors, colorAliases, inputFile):
+    if not backgroundColors:
+        backgroundColors = DEFAULT_BACKGROUND_COLORS
+    backgroundColorsSplit = backgroundColors.split(",")
+    for backgroundColor in backgroundColorsSplit:
+        if backgroundColor.startswith("#"):
+            if not RGB_REGEX.match(backgroundColor):
+                exitWithErrorMessage("Config for input file '%s' has invalid RGB value in 'background_colors': "
+                    "%s" % (inputFile, backgroundColor))
+        else:
+            if not backgroundColor in colorAliases:
+                exitWithErrorMessage("No alias '%s' configured for input file: %s" % (backgroundColor, inputFile))
+    return backgroundColorsSplit
+
+def parseFormats(formats, inputFile):
+    if not formats:
+        formats = DEFAULT_FORMATS
+    formatsSplit = formats.split(",")
+    for format in formatsSplit:
+        if not FORMATS_REGEX.match(format):
+            exitWithErrorMessage("Config for input file '%s' has invalid 'formats' value: "
+                "%s" % (inputFile, format))
+    return formatsSplit
+
+def parseResolutions(resolutions, inputFile):
+    if not resolutions:
+        resolutions = DEFAULT_RESOLUTIONS
+    resolutionsSplit = resolutions.split(",")
+    for resolution in resolutionsSplit:
+        if not RESOLUTIONS_REGEX.match(resolution):
+            exitWithErrorMessage("Config for input file '%s' has invalid 'resolutions' value: "
+                "%s" % (inputFile, resolution))
+    return resolutionsSplit
+
+def processConfig(configParser):
+    # 'config' structure when populated:
+    #
+    # { "colorAliases"     : { alias : rgb }
+    #   "defaultInputDir"  : dir
+    #   "defaultOutputDir" : dir
+    #   "inputFiles"       : [ ( filename, { "background_colors" : [ background_color ]
+    #                                        "formats"           : [ format ]
+    #                                        "input_dir"         : dir
+    #                                        "output_dir"        : dir
+    #                                        "resolutions"       : [ resolution ]
+    #                                      }
+    #                          )
+    #                        ]
+    # }
+    config = {
+        "colorAliases"     : {},
+        "defaultInputDir"  : "",
+        "defaultOutputDir" : "",
+        "inputFiles"       : []
+    }
+
+    # config["colorAliases"]
+    try:
+        colorAliases = configParser.items("Color Aliases")
+    except NoOptionError:
+        pass
+    except NoSectionError:
+        pass
+    for (alias, rgb) in colorAliases:
+        if alias.startswith("#"):
+            exitWithErrorMessage("Configured color alias '%s' cannot be prefixed with '#'." % alias)
+        if re.search(alias, "\s"):
+            exitWithErrorMessage("Configured color alias '%s' cannot contain whitespace." % alias)
+        if not RGB_REGEX.match(rgb):
+            exitWithErrorMessage("Configured color alias '%s' has invalid RGB value: %s" % (alias, rgb))
+        config["colorAliases"][alias] = rgb
+
+    # config["defaultInputDir"]
+    try:
+        defaultInputDir = configParser.get("Main", "default_input_dir")
+    except NoOptionError:
+        pass
+    except NoSectionError:
+        pass
+    if not defaultInputDir:
+        defaultInputDir = DEFAULT_INPUT_DIR
+    if os.path.exists(defaultInputDir):
+        config["defaultInputDir"] = getRealPath(defaultInputDir)
+    else:
+        exitWithErrorMessage("Invalid directory configured for 'default_input_dir': " + defaultInputDir)
+
+    # config["defaultOutputDir"]
+    try:
+        defaultOutputDir = configParser.get("Main", "default_output_dir")
+    except NoOptionError:
+        pass
+    except NoSectionError:
+        pass
+    if not defaultOutputDir:
+        defaultOutputDir = DEFAULT_OUTPUT_DIR
+    if os.path.exists(defaultOutputDir):
+        config["defaultOutputDir"] = getRealPath(defaultOutputDir)
+    else:
+        exitWithErrorMessage("Invalid directory configured for 'default_output_dir': " + defaultOutputDir)
+
+    # config["inputFiles"]
+    inputFiles = []
+    for inputFile in configParser.sections():
+        if inputFile == "Main" or inputFile == "Color Aliases":
+            continue
+        if not inputFile.endswith(".svg"):
+            exitWithErrorMessage("Configured input file must have '.svg' extension: " + inputFile)
+
+        inputFileOptions = {}
+
+        backgroundColors = ""
+        formats          = ""
+        inputDir         = ""
+        outputDir        = ""
+        resolutions      = ""
+
+        # inputFileOptions["background_colors"]
+        try:
+            backgroundColors = configParser.get(inputFile, "background_colors")
+        except NoOptionError:
+            pass
+        inputFileOptions["background_colors"] = parseBackgroundColors(
+            backgroundColors,
+            config["colorAliases"],
+            inputFile)
+
+        # inputFileOptions["formats"]
+        try:
+            formats = configParser.get(inputFile, "formats")
+        except NoOptionError:
+            pass
+        inputFileOptions["formats"] = parseFormats(formats, inputFile)
+
+        # inputFileOptions["input_dir"]
+        try:
+            inputDir = configParser.get(inputFile, "input_dir")
+        except NoOptionError:
+            pass
+        inputFileOptions["input_dir"] = getRealPath(inputDir)
+        if inputFileOptions["input_dir"]:
+            if not os.path.exists(inputFileOptions["input_dir"]):
+                exitWithErrorMessage("Invalid 'input_dir' for input file '%s': "
+                    "%s" % (inputFile, inputFileOptions["input_dir"]))
+            inputFilePath = os.path.join(inputFileOptions["input_dir"], inputFile)
+        else:
+            inputFilePath = os.path.join(config["defaultInputDir"], inputFile)
+
+        if not os.path.exists(inputFilePath):
+            exitWithErrorMessage("Configured input file does not exist: " + inputFilePath)
+
+        # inputFileOptions["output_dir"]
+        try:
+            outputDir = configParser.get(inputFile, "output_dir")
+        except NoOptionError:
+            pass
+        inputFileOptions["output_dir"] = getRealPath(outputDir)
+        if inputFileOptions["output_dir"]:
+            if not options.outputDir and not os.path.exists(inputFileOptions["output_dir"]):
+                exitWithErrorMessage("Invalid 'output_dir' for input file '%s': "
+                    "%s" % (inputFile, inputFileOptions["output_dir"]))
+
+        # inputFileOptions["resolutions"]
+        try:
+            resolutions = configParser.get(inputFile, "resolutions")
+        except NoOptionError:
+            pass
+        inputFileOptions["resolutions"] = parseResolutions(resolutions, inputFile)
+
+        inputFiles += [(inputFile, inputFileOptions)]
+
+    config["inputFiles"] = inputFiles
+    return config
+
+def processImages(options, config):
+    if not options.quiet:
+        print "::: Processing images..."
+
+    for (inputFile, inputFileOptions) in config["inputFiles"]:
+        if inputFileOptions["input_dir"]:
+            inputFilePath = os.path.join(inputFileOptions["input_dir"], inputFile)
+        else:
+            inputFilePath = os.path.join(config["defaultInputDir"], inputFile)
+
+        if not options.quiet:
+            print ">>> " + inputFilePath
+
+        if options.outputDir:
+            outputDir = options.outputDir
+        elif inputFileOptions["output_dir"]:
+            outputDir = inputFileOptions["output_dir"]
+        else:
+            outputDir = config["defaultOutputDir"]
+
+        for format in inputFileOptions["formats"]:
+            if format == "grub_legacy":
+                if inputFileOptions["background_colors"]:
+                    for backgroundColor in inputFileOptions["background_colors"]:
+                        if backgroundColor.startswith("#"):
+                            realBackgroundColor = backgroundColor[1:]
+                        else:
+                            realBackgroundColor = config["colorAliases"][backgroundColor][1:]
+                        convertGrubLegacy(options,
+                                          realBackgroundColor,
+                                          inputFilePath,
+                                          inputFile[:-4] + "-" + backgroundColor + "-640x480",
+                                          outputDir)
+                else:
+                    convertGrubLegacy(options,
+                                      "",
+                                      inputFilePath,
+                                      inputFile[:-4] + "-640x480",
+                                      outputDir)
+            else:
+                for resolution in inputFileOptions["resolutions"]:
+                    resolutionSplit = resolution.split("x")
+                    width = resolutionSplit[0]
+                    height = resolutionSplit[1]
+
+                    if inputFileOptions["background_colors"]:
+                        for backgroundColor in inputFileOptions["background_colors"]:
+                            if backgroundColor.startswith("#"):
+                                realBackgroundColor = backgroundColor[1:]
+                            else:
+                                realBackgroundColor = config["colorAliases"][backgroundColor][1:]
+                            convertFormat(options,
+                                          format,
+                                          width,
+                                          height,
+                                          realBackgroundColor,
+                                          inputFilePath,
+                                          outputDir,
+                                          inputFile[:-4] + "-" + backgroundColor + "-" + resolution)
+                    else:
+                        convertFormat(options,
+                                      format,
+                                      width,
+                                      height,
+                                      "",
+                                      inputFilePath,
+                                      outputDir,
+                                      inputFile[:-4] + "-" + resolution)
+    if not options.quiet:
+        print "::: Processing complete."
+
+def runShellCommand(command):
+    (status, output) = getstatusoutput(command)
+    if output and options.debug:
+        print output
+    if status:
+        raise OSError(status, output)
+
+if __name__ == "__main__":
+    options = parseArgs()
+    configParser = SafeConfigParser()
+
+    if options.configFile:
+        try:
+            configParser.read(options.configFile)
+        except:
+            exitWithErrorMessage("Option --config requires a valid config file.")
+    else:
+        try:
+            configParser.read(DEFAULT_CONFIG_FILE)
+        except:
+            exitWithErrorMessage("Missing or invalid default config file: " + DEFAULT_CONFIG_FILE)
+
+    try:
+        config = processConfig(configParser)
+        if not config["inputFiles"]:
+            exitWithErrorMessage("No input files specified in config file.")
+        processImages(options, config)
+    except Exception, e:
+        if options.debug:
+            traceback.print_exc()
+            sys.exit(1)
+        exitWithErrorMessage(str(e))
