@@ -8,7 +8,7 @@
 # uninstall. To enable this functionality, this script should be copied or
 # symlinked into:
 #
-#     /usr/share/paludis/hooks/uninstall_all_pre/
+#     /usr/share/paludis/hooks/uninstall_pre/
 #     /usr/share/paludis/hooks/uninstall_all_post/
 #
 # You should ensure that it has execute permissions.
@@ -20,12 +20,10 @@ contentsfile="${fileprefix}.contents"
 rmfile="${fileprefix}.remove"
 
 case "${HOOK}" in
-    # TODO: don't just get the contents of the targets, but all packages to be 
-    # uninstalled. This will add --with-unused-dependencies support.
-    uninstall_all_pre)
-    for i in `${PALUDIS_COMMAND} -k ${TARGETS} | grep '^\    /' | cut -d' ' -f5`; do 
+    uninstall_pre)
+    for i in `${PALUDIS_COMMAND} -k ${TARGET%-[0-9]*} | grep '^\    /' | cut -d' ' -f5`; do 
         ls -dF "$i" | sed -e '/\/$/ d' -e 's/\*//g'; 
-    done > ${contentsfile}
+    done >> ${contentsfile}
 
     ;;
 
