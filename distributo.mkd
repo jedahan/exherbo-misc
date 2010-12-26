@@ -4,68 +4,62 @@ Installation
   linux software. The simplest installation should be as follows:
 
   download, burn and boot livecd
-      `wget http://destructivesynthesis.wordpress.org/exherbo.tar.bz2 | tar xf - && wodim exherbo.iso && reboot`
+      wget http://jedahan.github.com/exherbo.tar.bz2 | tar xf - && wodim exherbo.iso && reboot
   mount installation directories
-      `choose /, /boot, /home`
+      choose /, /boot, /home
   set environment variables
-      `timezone, username, password, root[=/mnt/install]`
+      timezone, username, password, root[=/mnt/install]
   install exherbo flavour
-      `paludis -i flavour::flavour [-d=$root]`
+      cave resolve -x flavour::flavour [-d=$root]
   update system
-      `eclectic config interactive`
+      eclectic config interactive [-d=$root]
 
 Distibuto
 =========
   Distributo builds a repository with all the necessary packages to
-  replicate an installed system
+  replicate an installed system. After configuring everything in
+  $paludis\_config\_dir/distribution/$flavour/, running
+  `cave distribute $flavour` will result in two exheres:
 
-  Three exheres are created:
-    `flavour-base`
-        'Virtual' exheres that depends on the PNVR of each package in world
-        may read /etc/distributo/.base-{white,black}list
-    `flavour-misc`
-        Takes any modified config files and tars them up as ._cfg_$filename_001
-        Takes any new or modified files in /root/ and also tars them up
-        may read $root/etc/distributo/.{etc,misc}-{white,black}list
-    `flavour`
-        'Virtual' exheres that depends on flavour-base and flavour-misc
-        
+  flavour-vanilla.exheres
+    * 'virtual' exheres dep based on any set (defaults to world::environment)
+    * adds or filters packages listed in $distribution\_dir/package\_{white,black}list
+  flavour.exheres
+    * contains all the modified files post-vanilla install, similar to baselayout
+    * any modified config files are tarred to .\_cfg\_$filename\_001
+    * any unmanaged files in /root/ are tarred up
+    * adds or filters files listed in $distribution\_dir/file\_{white,black}list
+    * depends on flavour-vanilla
+ 
 Psuedo-code
 ===========
 
-  `cfgroot=$root/etc/distributo/`
-  `tmp=$root/var/tmp/distributo/`
-
-  flavour-base
+  flavour-vanilla
 
       # Dependency calculation
-      pkgs=`cat $root/var/db/paldis/repositories/installed/world $cfgroot/.base-blacklist | uniq -u`
-      for pkg in `echo $pkgs; cat $cfgroot/.bash-whitelist`; do
-                version=`paludis -q $pkg | grep installed | awk '{print $2}' | cut -d'*' -f1`
-                DEPS="$DEPS\n $pkg[>=$version]"
+      world_packages=`cave show world::environment -n | grep '^ ' | awk '{print $1}'`
+      blacklisted_packages=`cat $config_root/base_blacklist`
+
+      for package in `$world_packages $blacklisted_packages | uniq -u`; do
+                version=`cave print-best-version --format=version $pkg`
+                DEPENDENCIES="$DEPENDENCIES\n $package[>=$version]"
       done
 
-  flavour-misc
+  flavour
     
         # we may want to just use paludis -k...
-        paludis -i $tmp/flavour-base.exheres-0 -d $tmp/build
+        paludis -i $tmp/flavour.exheres-0 -d $paludis_build_dir/$distribution
 
         echo "copying config files"
-        configs=`find $tmp/build/etc/; cat $cfgroot/.etc-blacklist | uniq -u`
-        for config in `echo $configs; cat $cfgroot/.etc-whitelist`; do
-            if [ -e $root$config ]; then
-                if [ ! -eq `cat $root$config` `cat $config` ]; then
-                    cp $root$config $tmp/build/._cfg_$config_001
-                fi
+        for config in $paludis_build_dir/etc; do
+            if [ uniq -u $config (cat $distribution_dir/file_blacklist) ]
+              if [ ! (diff -u $paludis_tmp_dir/$config $config ) ]
+                cp $paludis_tmp_dir$config $paludis_build_dir/etc/._cfg_$config_001
+              fi
             fi
         done
-
-        echo "building supplimental file list"
-        miscs=`find $root{/root,/usr/local}; cat $cfgroot/.etc-blacklist | uniq -u`
-        for misc in `echo $miscs; cat $cfgroot/.etc-whitelist`; do
-            if [ ! -e $tmp/build/$misc ]; then
-                echo $misc >> $tmp/misc
-            fi
+        for misc_file in (cat $distribution_dir/file_whilelist); do
+          cp $paludis_tmp_dir$misc_file $paludis_build_dir/
         done
 
-        tar xvjpf files/flavour-misc.tar.bz2 `cat $tmp/misc`
+        tar xvjpf flavour.tar.bz2 $paludis_build_dir
