@@ -1,0 +1,1 @@
+Miscellaneous hooks and ideas for Exherbo
